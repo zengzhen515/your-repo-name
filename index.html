@@ -156,6 +156,7 @@
             max-width: 90%;
             max-height: 90%;
             border-radius: 10px;
+            cursor: pointer; /* 添加指针样式 */
         }
 
         #imageModal .close {
@@ -236,7 +237,7 @@
     <!-- 图片弹窗 -->
     <div id="imageModal">
         <span class="close" onclick="closeImageModal()">&times;</span>
-        <img id="modalImage" src="" alt="图片">
+        <img id="modalImage" src="" alt="图片" onclick="closeImageModal()">
     </div>
 
     <script>
