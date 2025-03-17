@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>智能计价器</title>
+    <style>
+        :root {
+            --main-color: #2c3e50;
+            --accent-color: #3498db;
+            --display-bg: #1a1a1a;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: #fff;
+            min-height: 100vh;
+            margin: 0;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            height: calc(100vh - 20px);
+            max-width: 100%;
+            background: rgba(0,0,0,0.7);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 15px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .tab.active {
+            background: var(--accent-color);
+        }
+
+        #resultDisplay {
+            font-size: 3.5em;
+            font-weight: 700;
+            color: #27ae60;
+            padding: 30px 0;
+            text-align: center;
+        }
+
+        input, select {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+            margin: 5px 0;
+        }
+
+        button {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: var(--accent-color);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .compact-btn {
+            padding: 6px 12px;
+            font-size: 14px;
+            width: auto;
+        }
+
+        .user-management {
+            margin-bottom: 20px;
+        }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin: 8px 0;
+        }
+
+        .price-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--display-bg);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .setting-item {
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('home')">主界面</div>
+            <div class="tab" onclick="showTab('settings')">设置</div>
+        </div>
+
+        <div id="homeTab">
+            <div id="resultDisplay">0.00</div>
+            <div class="button-group">
+                <input type="number" id="inputA" placeholder="输入金额" step="0.01">
+                <select id="selectB"></select>
+                <div class="price-display">
+                    <span>优惠价：<span id="showC">0.00</span></span>
+                    <button id="toggleD" class="compact-btn" onclick="toggleD()">员工(关闭)</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="settingsTab" style="display: none;">
+            <div class="user-management">
+                <h4>用户管理</h4>
+                <div class="user-item">
+                    <input type="text" id="userNameInput" placeholder="新用户名称">
+                    <button class="compact-btn" onclick="addUser()">＋ 添加</button>
+                </div>
+                <div id="userList"></div>
+            </div>
+
+            <div class="setting-item">
+                <h4>原价设置</h4>
+                <div id="bList"></div>
+                <button class="compact-btn" onclick="addB()">＋ 添加原价</button>
+            </div>
+
+            <div class="setting-item">
+                <label>优惠价：</label>
+                <input type="number" id="inputC" step="0.01">
+            </div>
+
+            <div class="setting-item">
+                <label>员工提成：</label>
+                <input type="number" id="inputD" step="0.01">
+            </div>
+
+            <button onclick="saveSettings()">保存设置</button>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let dActive = false;
+        let users = [];
+        let settings = {};
+
+        function init() {
+            loadFromStorage();
+            if(users.length === 0) {
+                addUser('默认用户');
+            }
+            currentUser = users[0].id;
+            showTab('home');
+            updateUserList();
+            loadUserSettings();
+            initEventListeners();
+        }
+
+        function addUser(name) {
+            const userName = name || document.getElementById('userNameInput').value;
+            if(!userName) return;
+            
+            const newUser = {
+                id: Date.now().toString(),
+                name: userName,
+                timestamp: new Date().getTime()
+            };
+            
+            users.push(newUser);
+            settings[newUser.id] = { B: [100], C: 0, D: 0 };
+            
+            updateUserList();
+            saveToStorage();
+            document.getElementById('userNameInput').value = '';
+        }
+
+        function updateUserList() {
+            const userList = document.getElementById('userList');
+            userList.innerHTML = users.map(user => `
+                <div class="user-item">
+                    <input type="text" value="${user.name}" 
+                           onchange="updateUserName('${user.id}', this.value)"
+                           style="flex:1">
+                    <button class="compact-btn" onclick="deleteUser('${user.id}')">×</button>
+                    ${currentUser === user.id ? '<span style="color:#2ecc71">✓</span>' : ''}
+                </div>
+            `).join('');
+        }
+
+        function updateUserName(userId, newName) {
+            const user = users.find(u => u.id === userId);
+            if(user && newName) user.name = newName;
+            saveToStorage();
+        }
+
+        function deleteUser(userId) {
+            if(!confirm('确定要删除这个用户吗？')) return;
+            users = users.filter(u => u.id !== userId);
+            delete settings[userId];
+            if(currentUser === userId) currentUser = users[0]?.id;
+            updateUserList();
+            loadUserSettings();
+            saveToStorage();
+        }
+
+        function loadUserSettings() {
+            if(!currentUser) return;
+            
+            const userSettings = settings[currentUser];
+            document.getElementById('inputC').value = userSettings.C;
+            document.getElementById('inputD').value = userSettings.D;
+            
+            // 更新原价选项
+            const selectB = document.getElementById('selectB');
+            selectB.innerHTML = userSettings.B.map(b => 
+                `<option value="${b}">原价：${b}</option>`
+            ).join('');
+            
+            // 更新原价设置列表
+            const bList = document.getElementById('bList');
+            bList.innerHTML = userSettings.B.map((b, i) => `
+                <div class="user-item" style="margin:5px 0">
+                    <input type="number" value="${b}" 
+                           onchange="handleBChange(${i}, this.value)"
+                           style="flex:1">
+                    <button class="compact-btn" onclick="removeB(${i})">×</button>
+                </div>
+            `).join('');
+            
+            updateDisplay();
+        }
+
+        function handleBChange(index, value) {
+            const numValue = parseFloat(value);
+            if(!isNaN(numValue)) {
+                settings[currentUser].B[index] = numValue;
+                updateBSelect();
+                updateCalculation();
+            }
+        }
+
+        function removeB(index) {
+            settings[currentUser].B.splice(index, 1);
+            loadUserSettings();
+            updateCalculation();
+        }
+
+        function addB() {
+            const newB = prompt('请输入新的原价：');
+            if(newB && !isNaN(newB)) {
+                settings[currentUser].B.push(parseFloat(newB));
+                loadUserSettings();
+                updateCalculation();
+            }
+        }
+
+        function updateBSelect() {
+            const selectB = document.getElementById('selectB');
+            selectB.innerHTML = settings[currentUser].B.map(b => 
+                `<option value="${b}">原价：${b}</option>`
+            ).join('');
+        }
+
+        function saveSettings() {
+            settings[currentUser].C = parseFloat(document.getElementById('inputC').value) || 0;
+            settings[currentUser].D = parseFloat(document.getElementById('inputD').value) || 0;
+            saveToStorage();
+            updateDisplay();
+            showTab('home');
+        }
+
+        function toggleD() {
+            dActive = !dActive;
+            const btn = document.getElementById('toggleD');
+            btn.innerHTML = `员工(${dActive ? '开启' : '关闭'})`;
+            updateDisplay();
+            updateCalculation();
+        }
+
+        function updateCalculation() {
+            const A = parseFloat(document.getElementById('inputA').value) || 0;
+            const B = parseFloat(document.getElementById('selectB').value) || 1;
+            const C = settings[currentUser]?.C || 0;
+            const D = dActive ? (settings[currentUser]?.D || 0) : 0;
+            
+            const E = (A / B) * (C + D);
+            document.getElementById('resultDisplay').textContent = E.toFixed(2);
+        }
+
+        function updateDisplay() {
+            const C = settings[currentUser]?.C || 0;
+            const D = dActive ? (settings[currentUser]?.D || 0) : 0;
+            document.getElementById('showC').textContent = (C + D).toFixed(2);
+        }
+
+        function initEventListeners() {
+            document.getElementById('inputA').addEventListener('input', updateCalculation);
+            document.getElementById('selectB').addEventListener('change', updateCalculation);
+        }
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('homeTab').style.display = 'none';
+            document.getElementById('settingsTab').style.display = 'none';
+            
+            if(tabName === 'home') {
+                document.querySelector('.tab:nth-child(1)').classList.add('active');
+                document.getElementById('homeTab').style.display = 'block';
+                updateCalculation();
+            } else {
+                document.querySelector('.tab:nth-child(2)').classList.add('active');
+                document.getElementById('settingsTab').style.display = 'block';
+                loadUserSettings();
+            }
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('users', JSON.stringify(users));
+            localStorage.setItem('settings', JSON.stringify(settings));
+        }
+
+        function loadFromStorage() {
+            const savedUsers = localStorage.getItem('users');
+            const savedSettings = localStorage.getItem('settings');
+            if(savedUsers) users = JSON.parse(savedUsers);
+            if(savedSettings) settings = JSON.parse(savedSettings);
+        }
+
+        // 初始化
+        init();
+        setInterval(saveToStorage, 5000);
+    </script>
+</body>
+</html>
