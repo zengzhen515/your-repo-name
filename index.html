@@ -9,6 +9,7 @@
             --main-color: #2c3e50;
             --accent-color: #3498db;
             --display-bg: #1a1a1a;
+            --button-hover: rgba(52, 152, 219, 0.8);
         }
 
         body {
@@ -19,15 +20,18 @@
             margin: 0;
             padding: 10px;
             box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .container {
-            height: calc(100vh - 20px);
-            max-width: 100%;
-            background: rgba(0,0,0,0.7);
+            width: 100%;
+            max-width: 400px;
+            background: rgba(0, 0, 0, 0.7);
             border-radius: 15px;
-            padding: 15px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
         }
 
         .tabs {
@@ -37,20 +41,36 @@
 
         .tab {
             flex: 1;
-            padding: 10px;
+            padding: 12px;
             text-align: center;
             cursor: pointer;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 8px;
             margin: 0 5px;
+            font-size: 16px;
+            transition: background 0.3s;
         }
 
         .tab.active {
             background: var(--accent-color);
         }
 
+        .tab:hover {
+            background: var(--button-hover);
+        }
+
+        #homeTab,
+        #settingsTab {
+            display: none; /* 默认隐藏 */
+        }
+
+        #homeTab.active,
+        #settingsTab.active {
+            display: block; /* 显示选中的选项卡 */
+        }
+
         #resultDisplay {
-            font-size: 3.5em;
+            font-size: 3em;
             font-weight: 700;
             color: #27ae60;
             padding: 20px 0;
@@ -58,7 +78,7 @@
         }
 
         #literDisplay {
-            font-size: 1.5em;
+            font-size: 1.2em;
             color: #bdc3c7;
             text-align: center;
             margin-top: -10px;
@@ -91,6 +111,7 @@
             cursor: pointer;
             transition: all 0.3s;
             width: 100%;
+            font-size: 16px;
         }
 
         button:hover {
@@ -101,17 +122,6 @@
             padding: 8px 12px;
             font-size: 14px;
             width: auto;
-        }
-
-        .user-management {
-            margin-bottom: 20px;
-        }
-
-        .user-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            margin: 8px 0;
         }
 
         .price-display {
@@ -137,7 +147,36 @@
 
         .image-buttons button {
             flex: 1;
-            background: #27ae60;
+        }
+
+        /* 信用卡支付按钮颜色 */
+        #creditCardButton {
+            background: #3498db;
+        }
+
+        /* 单选按钮样式 */
+        .price-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .price-option {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .price-option.selected {
+            background: var(--accent-color);
+        }
+
+        .price-option:hover {
+            background: var(--button-hover);
         }
 
         #imageModal {
@@ -150,13 +189,14 @@
             background: rgba(0, 0, 0, 0.8);
             justify-content: center;
             align-items: center;
+            z-index: 1000;
         }
 
         #imageModal img {
             max-width: 90%;
             max-height: 90%;
             border-radius: 10px;
-            cursor: pointer; /* 添加指针样式 */
+            cursor: pointer;
         }
 
         #imageModal .close {
@@ -176,12 +216,15 @@
             <div class="tab" onclick="showTab('settings')">设置</div>
         </div>
 
-        <div id="homeTab">
+        <div id="homeTab" class="active">
             <div id="resultDisplay">0.00</div>
             <div id="literDisplay">0.00 升</div>
             <div class="button-group">
-                <input type="number" id="inputA" placeholder="输入金额" step="0.01" onfocus="clearInput(this)">
-                <select id="selectB"></select>
+                <input type="number" id="inputA" placeholder="输入金额" step="0.01" onfocus="clearInput(this)" oninput="updateCalculation()">
+                <div class="price-options">
+                    <div id="highPriceOption" class="price-option" onclick="selectPrice('high')">高价卡：0.00</div>
+                    <div id="lowPriceOption" class="price-option" onclick="selectPrice('low')">低价卡：0.00</div>
+                </div>
                 <div class="price-display">
                     <span>优惠价：<span id="showC">0.00</span></span>
                     <button id="toggleD" class="compact-btn" onclick="toggleD()">员工(关闭)</button>
@@ -189,25 +232,22 @@
             </div>
             <div class="image-buttons">
                 <button onclick="showImage(0)">微信支付</button>
-                <button onclick="showImage(1)">信用卡支付</button>
+                <button id="creditCardButton" onclick="showImage(1)">信用卡支付</button>
                 <button onclick="showImage(2)">加入群聊</button>
             </div>
         </div>
 
-        <div id="settingsTab" style="display: none;">
-            <div class="user-management">
-                <h4>用户管理</h4>
-                <div class="user-item">
-                    <input type="text" id="userNameInput" placeholder="新用户名称">
-                    <button class="compact-btn" onclick="addUser()">＋ 添加</button>
-                </div>
-                <div id="userList"></div>
-            </div>
-
+        <div id="settingsTab">
             <div class="setting-item">
                 <h4>原价设置</h4>
-                <div id="bList"></div>
-                <button class="compact-btn" onclick="addB()">＋ 添加原价</button>
+                <div class="price-setting">
+                    <label>高价卡：</label>
+                    <input type="number" id="highPriceInput" step="0.01" onchange="updatePrice('high')">
+                </div>
+                <div class="price-setting">
+                    <label>低价卡：</label>
+                    <input type="number" id="lowPriceInput" step="0.01" onchange="updatePrice('low')">
+                </div>
             </div>
 
             <div class="setting-item">
@@ -241,198 +281,163 @@
     </div>
 
     <script>
-        let currentUser = null;
         let dActive = false;
-        let users = [];
-        let settings = {};
+        let settings = {
+            highPrice: 0,
+            lowPrice: 0,
+            C: 0, // 优惠价
+            D: 0  // 员工提成
+        };
         let images = [null, null, null]; // 存储 3 张图片的 Base64 数据
 
+        // 初始化
         function init() {
             loadFromStorage();
-            if(users.length === 0) {
-                addUser('默认用户');
-            }
-            currentUser = users[0].id;
-            showTab('home');
-            updateUserList();
-            loadUserSettings();
+            showTab('home'); // 默认显示主界面
+            updatePriceDisplay();
+            updateDisplay();
             initEventListeners();
-        }
 
-        function addUser(name) {
-            const userName = name || document.getElementById('userNameInput').value;
-            if(!userName) return;
-            
-            const newUser = {
-                id: Date.now().toString(),
-                name: userName,
-                timestamp: new Date().getTime()
-            };
-            
-            users.push(newUser);
-            settings[newUser.id] = { B: [100], C: 0, D: 0 };
-            
-            updateUserList();
-            saveToStorage();
-            document.getElementById('userNameInput').value = '';
-        }
-
-        function updateUserList() {
-            const userList = document.getElementById('userList');
-            userList.innerHTML = users.map(user => `
-                <div class="user-item">
-                    <input type="text" value="${user.name}" 
-                           onchange="updateUserName('${user.id}', this.value)"
-                           style="flex:1">
-                    <button class="compact-btn" onclick="deleteUser('${user.id}')">×</button>
-                    ${currentUser === user.id ? '<span style="color:#2ecc71">✓</span>' : ''}
-                </div>
-            `).join('');
-        }
-
-        function updateUserName(userId, newName) {
-            const user = users.find(u => u.id === userId);
-            if(user && newName) user.name = newName;
-            saveToStorage();
-        }
-
-        function deleteUser(userId) {
-            if(!confirm('确定要删除这个用户吗？')) return;
-            users = users.filter(u => u.id !== userId);
-            delete settings[userId];
-            if(currentUser === userId) currentUser = users[0]?.id;
-            updateUserList();
-            loadUserSettings();
-            saveToStorage();
-        }
-
-        function loadUserSettings() {
-            if(!currentUser) return;
-            
-            const userSettings = settings[currentUser];
-            document.getElementById('inputC').value = userSettings.C;
-            document.getElementById('inputD').value = userSettings.D;
-            
-            // 更新原价选项
-            const selectB = document.getElementById('selectB');
-            selectB.innerHTML = userSettings.B.map(b => 
-                `<option value="${b}">原价：${b}</option>`
-            ).join('');
-            
-            // 更新原价设置列表
-            const bList = document.getElementById('bList');
-            bList.innerHTML = userSettings.B.map((b, i) => `
-                <div class="user-item" style="margin:5px 0">
-                    <input type="number" value="${b}" 
-                           onchange="handleBChange(${i}, this.value)"
-                           style="flex:1">
-                    <button class="compact-btn" onclick="removeB(${i})">×</button>
-                </div>
-            `).join('');
-            
-            updateDisplay();
-        }
-
-        function handleBChange(index, value) {
-            const numValue = parseFloat(value);
-            if(!isNaN(numValue)) {
-                settings[currentUser].B[index] = numValue;
-                updateBSelect();
-                updateCalculation();
+            // 初始化原价选择
+            const savedPriceType = localStorage.getItem('selectedPriceType');
+            if (savedPriceType) {
+                selectPrice(savedPriceType, false);
+            } else {
+                selectPrice('high', false); // 默认选择高价卡
             }
         }
 
-        function removeB(index) {
-            settings[currentUser].B.splice(index, 1);
-            loadUserSettings();
-            updateCalculation();
-        }
-
-        function addB() {
-            const newB = prompt('请输入新的原价：');
-            if(newB && !isNaN(newB)) {
-                settings[currentUser].B.push(parseFloat(newB));
-                loadUserSettings();
-                updateCalculation();
-            }
-        }
-
-        function updateBSelect() {
-            const selectB = document.getElementById('selectB');
-            selectB.innerHTML = settings[currentUser].B.map(b => 
-                `<option value="${b}">原价：${b}</option>`
-            ).join('');
-        }
-
-        function saveSettings() {
-            settings[currentUser].C = parseFloat(document.getElementById('inputC').value) || 0;
-            settings[currentUser].D = parseFloat(document.getElementById('inputD').value) || 0;
-            saveToStorage();
-            updateDisplay();
-            showTab('home');
-        }
-
-        function toggleD() {
-            dActive = !dActive;
-            const btn = document.getElementById('toggleD');
-            btn.innerHTML = `员工(${dActive ? '开启' : '关闭'})`;
-            updateDisplay();
-            updateCalculation();
-        }
-
-        function updateCalculation() {
-            const A = parseFloat(document.getElementById('inputA').value) || 0;
-            const B = parseFloat(document.getElementById('selectB').value) || 1;
-            const C = settings[currentUser]?.C || 0;
-            const D = dActive ? (settings[currentUser]?.D || 0) : 0;
-            
-            const E = (A / B) * (C + D);
-            document.getElementById('resultDisplay').textContent = E.toFixed(2);
-            
-            const liters = (A / B).toFixed(2);
-            document.getElementById('literDisplay').textContent = `${liters} 升`;
-        }
-
-        function updateDisplay() {
-            const C = settings[currentUser]?.C || 0;
-            const D = dActive ? (settings[currentUser]?.D || 0) : 0;
-            document.getElementById('showC').textContent = (C + D).toFixed(2);
-        }
-
-        function initEventListeners() {
-            document.getElementById('inputA').addEventListener('input', updateCalculation);
-            document.getElementById('selectB').addEventListener('change', updateCalculation);
-        }
-
+        // 显示选项卡
         function showTab(tabName) {
+            // 移除所有选项卡的 active 类
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            
+            // 隐藏所有内容区域
             document.getElementById('homeTab').style.display = 'none';
             document.getElementById('settingsTab').style.display = 'none';
             
-            if(tabName === 'home') {
+            // 显示选中的选项卡内容
+            if (tabName === 'home') {
                 document.querySelector('.tab:nth-child(1)').classList.add('active');
                 document.getElementById('homeTab').style.display = 'block';
-                updateCalculation();
-            } else {
+            } else if (tabName === 'settings') {
                 document.querySelector('.tab:nth-child(2)').classList.add('active');
                 document.getElementById('settingsTab').style.display = 'block';
-                loadUserSettings();
             }
         }
 
+        // 选择原价
+        function selectPrice(priceType, updateStorage = true) {
+            const highPriceOption = document.getElementById('highPriceOption');
+            const lowPriceOption = document.getElementById('lowPriceOption');
+            highPriceOption.classList.remove('selected');
+            lowPriceOption.classList.remove('selected');
+            if (priceType === 'high') {
+                highPriceOption.classList.add('selected');
+            } else {
+                lowPriceOption.classList.add('selected');
+            }
+            if (updateStorage) {
+                localStorage.setItem('selectedPriceType', priceType);
+            }
+            updateCalculation(); // 触发计算逻辑
+        }
+
+        // 更新原价显示
+        function updatePriceDisplay() {
+            const highPrice = settings.highPrice || 0;
+            const lowPrice = settings.lowPrice || 0;
+            document.getElementById('highPriceOption').textContent = `高价卡：${highPrice.toFixed(2)}`;
+            document.getElementById('lowPriceOption').textContent = `低价卡：${lowPrice.toFixed(2)}`;
+        }
+
+        // 更新原价设置
+        function updatePrice(priceType) {
+            const input = priceType === 'high' ? document.getElementById('highPriceInput') : document.getElementById('lowPriceInput');
+            const value = parseFloat(input.value) || 0;
+            if (priceType === 'high') {
+                settings.highPrice = value;
+            } else {
+                settings.lowPrice = value;
+            }
+
+            // 保存到本地存储
+            saveToStorage();
+
+            // 更新主界面显示
+            updatePriceDisplay();
+            updateCalculation();
+        }
+
+        // 保存设置
+        function saveSettings() {
+            // 保存设置
+            settings.highPrice = parseFloat(document.getElementById('highPriceInput').value) || 0;
+            settings.lowPrice = parseFloat(document.getElementById('lowPriceInput').value) || 0;
+            settings.C = parseFloat(document.getElementById('inputC').value) || 0;
+            settings.D = parseFloat(document.getElementById('inputD').value) || 0;
+
+            // 保存到本地存储
+            saveToStorage();
+
+            // 更新主界面显示
+            updatePriceDisplay();
+            updateDisplay();
+            updateCalculation();
+
+            // 返回主界面
+            showTab('home');
+        }
+
+        // 更新显示
+        function updateDisplay() {
+            const C = settings.C || 0; // 优惠价
+            const D = dActive ? (settings.D || 0) : 0; // 员工提成
+            const total = C + D; // 优惠价加员工提成的总和
+
+            // 更新优惠价显示
+            document.getElementById('showC').textContent = total.toFixed(2);
+        }
+
+        // 计算
+        function updateCalculation() {
+            const selectedPriceType = localStorage.getItem('selectedPriceType');
+            if (!selectedPriceType) {
+                document.getElementById('resultDisplay').textContent = '0.00';
+                document.getElementById('literDisplay').textContent = '0.00 升';
+                return;
+            }
+
+            const A = parseFloat(document.getElementById('inputA').value) || 0; // 输入金额
+            const B = getCurrentPrice(); // 当前原价
+            const C = settings.C || 0; // 优惠价
+            const D = dActive ? (settings.D || 0) : 0; // 员工提成
+
+            const E = (A / B) * (C + D); // 最终价格
+            document.getElementById('resultDisplay').textContent = E.toFixed(2);
+
+            const liters = (A / B).toFixed(2); // 升数
+            document.getElementById('literDisplay').textContent = `${liters} 升`;
+        }
+
+        // 获取当前原价
+        function getCurrentPrice() {
+            const selectedPriceType = localStorage.getItem('selectedPriceType') || 'high';
+            return selectedPriceType === 'high' ? settings.highPrice : settings.lowPrice;
+        }
+
+        // 保存到本地存储
         function saveToStorage() {
-            localStorage.setItem('users', JSON.stringify(users));
             localStorage.setItem('settings', JSON.stringify(settings));
             localStorage.setItem('images', JSON.stringify(images));
         }
 
+        // 从本地存储加载
         function loadFromStorage() {
-            const savedUsers = localStorage.getItem('users');
             const savedSettings = localStorage.getItem('settings');
             const savedImages = localStorage.getItem('images');
-            if(savedUsers) users = JSON.parse(savedUsers);
-            if(savedSettings) settings = JSON.parse(savedSettings);
-            if(savedImages) images = JSON.parse(savedImages);
+            if (savedSettings) settings = JSON.parse(savedSettings);
+            if (savedImages) images = JSON.parse(savedImages);
         }
 
         // 图片相关功能
@@ -465,6 +470,18 @@
         // 清空输入框
         function clearInput(input) {
             input.value = '';
+        }
+
+        // 切换员工提成状态
+        function toggleD() {
+            dActive = !dActive; // 切换员工提成状态
+            const btn = document.getElementById('toggleD');
+            btn.textContent = `员工(${dActive ? '开启' : '关闭'})`; // 更新按钮文本
+
+            // 更新优惠价显示
+            updateDisplay();
+            // 更新计算结果
+            updateCalculation();
         }
 
         // 初始化
