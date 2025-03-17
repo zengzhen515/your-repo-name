@@ -41,6 +41,8 @@
             text-align: center;
             cursor: pointer;
             background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            margin: 0 5px;
         }
 
         .tab.active {
@@ -51,8 +53,16 @@
             font-size: 3.5em;
             font-weight: 700;
             color: #27ae60;
-            padding: 30px 0;
+            padding: 20px 0;
             text-align: center;
+        }
+
+        #literDisplay {
+            font-size: 1.5em;
+            color: #bdc3c7;
+            text-align: center;
+            margin-top: -10px;
+            margin-bottom: 20px;
         }
 
         input, select {
@@ -64,6 +74,12 @@
             box-sizing: border-box;
             text-align: center;
             margin: 5px 0;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        input::placeholder {
+            color: #ccc;
         }
 
         button {
@@ -74,10 +90,15 @@
             color: white;
             cursor: pointer;
             transition: all 0.3s;
+            width: 100%;
+        }
+
+        button:hover {
+            opacity: 0.9;
         }
 
         .compact-btn {
-            padding: 6px 12px;
+            padding: 8px 12px;
             font-size: 14px;
             width: auto;
         }
@@ -106,6 +127,45 @@
         .setting-item {
             margin: 15px 0;
         }
+
+        .image-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .image-buttons button {
+            flex: 1;
+            background: #27ae60;
+        }
+
+        #imageModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+        }
+
+        #imageModal img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 10px;
+        }
+
+        #imageModal .close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -117,13 +177,19 @@
 
         <div id="homeTab">
             <div id="resultDisplay">0.00</div>
+            <div id="literDisplay">0.00 升</div>
             <div class="button-group">
-                <input type="number" id="inputA" placeholder="输入金额" step="0.01">
+                <input type="number" id="inputA" placeholder="输入金额" step="0.01" onfocus="clearInput(this)">
                 <select id="selectB"></select>
                 <div class="price-display">
                     <span>优惠价：<span id="showC">0.00</span></span>
                     <button id="toggleD" class="compact-btn" onclick="toggleD()">员工(关闭)</button>
                 </div>
+            </div>
+            <div class="image-buttons">
+                <button onclick="showImage(0)">微信支付</button>
+                <button onclick="showImage(1)">信用卡支付</button>
+                <button onclick="showImage(2)">加入群聊</button>
             </div>
         </div>
 
@@ -153,8 +219,24 @@
                 <input type="number" id="inputD" step="0.01">
             </div>
 
+            <div class="setting-item">
+                <h4>图片设置</h4>
+                <label>微信支付二维码：</label>
+                <input type="file" id="imageUpload1" accept="image/*" onchange="handleImageUpload(0)">
+                <label>信用卡支付二维码：</label>
+                <input type="file" id="imageUpload2" accept="image/*" onchange="handleImageUpload(1)">
+                <label>加入群聊二维码：</label>
+                <input type="file" id="imageUpload3" accept="image/*" onchange="handleImageUpload(2)">
+            </div>
+
             <button onclick="saveSettings()">保存设置</button>
         </div>
+    </div>
+
+    <!-- 图片弹窗 -->
+    <div id="imageModal">
+        <span class="close" onclick="closeImageModal()">&times;</span>
+        <img id="modalImage" src="" alt="图片">
     </div>
 
     <script>
@@ -162,6 +244,7 @@
         let dActive = false;
         let users = [];
         let settings = {};
+        let images = [null, null, null]; // 存储 3 张图片的 Base64 数据
 
         function init() {
             loadFromStorage();
@@ -304,6 +387,9 @@
             
             const E = (A / B) * (C + D);
             document.getElementById('resultDisplay').textContent = E.toFixed(2);
+            
+            const liters = (A / B).toFixed(2);
+            document.getElementById('literDisplay').textContent = `${liters} 升`;
         }
 
         function updateDisplay() {
@@ -336,13 +422,48 @@
         function saveToStorage() {
             localStorage.setItem('users', JSON.stringify(users));
             localStorage.setItem('settings', JSON.stringify(settings));
+            localStorage.setItem('images', JSON.stringify(images));
         }
 
         function loadFromStorage() {
             const savedUsers = localStorage.getItem('users');
             const savedSettings = localStorage.getItem('settings');
+            const savedImages = localStorage.getItem('images');
             if(savedUsers) users = JSON.parse(savedUsers);
             if(savedSettings) settings = JSON.parse(savedSettings);
+            if(savedImages) images = JSON.parse(savedImages);
+        }
+
+        // 图片相关功能
+        function handleImageUpload(index) {
+            const fileInput = document.getElementById(`imageUpload${index + 1}`);
+            const file = fileInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    images[index] = e.target.result;
+                    saveToStorage();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function showImage(index) {
+            if (images[index]) {
+                document.getElementById('modalImage').src = images[index];
+                document.getElementById('imageModal').style.display = 'flex';
+            } else {
+                alert('请先在设置页上传图片');
+            }
+        }
+
+        function closeImageModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+
+        // 清空输入框
+        function clearInput(input) {
+            input.value = '';
         }
 
         // 初始化
