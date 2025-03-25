@@ -3,490 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>智能计价器</title>
-    <style>
-        :root {
-            --main-color: #2c3e50;
-            --accent-color: #3498db;
-            --display-bg: #1a1a1a;
-            --button-hover: rgba(52, 152, 219, 0.8);
-        }
-
-        body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #2c3e50, #3498db);
-            color: #fff;
-            min-height: 100vh;
-            margin: 0;
-            padding: 10px;
-            box-sizing: border-box;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 400px;
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .tabs {
-            display: flex;
-            margin-bottom: 15px;
-        }
-
-        .tab {
-            flex: 1;
-            padding: 12px;
-            text-align: center;
-            cursor: pointer;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            margin: 0 5px;
-            font-size: 16px;
-            transition: background 0.3s;
-        }
-
-        .tab.active {
-            background: var(--accent-color);
-        }
-
-        .tab:hover {
-            background: var(--button-hover);
-        }
-
-        #homeTab,
-        #settingsTab {
-            display: none; /* 默认隐藏 */
-        }
-
-        #homeTab.active,
-        #settingsTab.active {
-            display: block; /* 显示选中的选项卡 */
-        }
-
-        #resultDisplay {
-            font-size: 3em;
-            font-weight: 700;
-            color: #27ae60;
-            padding: 20px 0;
-            text-align: center;
-        }
-
-        #literDisplay {
-            font-size: 1.2em;
-            color: #bdc3c7;
-            text-align: center;
-            margin-top: -10px;
-            margin-bottom: 20px;
-        }
-
-        input, select {
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            width: 100%;
-            box-sizing: border-box;
-            text-align: center;
-            margin: 5px 0;
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-        }
-
-        input::placeholder {
-            color: #ccc;
-        }
-
-        button {
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            background: var(--accent-color);
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s;
-            width: 100%;
-            font-size: 16px;
-        }
-
-        button:hover {
-            opacity: 0.9;
-        }
-
-        .compact-btn {
-            padding: 8px 12px;
-            font-size: 14px;
-            width: auto;
-        }
-
-        .price-display {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--display-bg);
-            padding: 12px;
-            border-radius: 8px;
-            margin: 10px 0;
-        }
-
-        .setting-item {
-            margin: 15px 0;
-        }
-
-        .image-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .image-buttons button {
-            flex: 1;
-        }
-
-        /* 信用卡支付按钮颜色 */
-        #creditCardButton {
-            background: #3498db;
-        }
-
-        /* 单选按钮样式 */
-        .price-options {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .price-option {
-            flex: 1;
-            padding: 10px;
-            text-align: center;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .price-option.selected {
-            background: var(--accent-color);
-        }
-
-        .price-option:hover {
-            background: var(--button-hover);
-        }
-
-        #imageModal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        #imageModal img {
-            max-width: 90%;
-            max-height: 90%;
-            border-radius: 10px;
-            cursor: pointer;
-        }
-
-        #imageModal .close {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            color: white;
-            font-size: 30px;
-            cursor: pointer;
-        }
-    </style>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="HandheldFriendly" content="true">
+    <title>油卡计算器</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
-        <div class="tabs">
-            <div class="tab active" onclick="showTab('home')">主界面</div>
-            <div class="tab" onclick="showTab('settings')">设置</div>
+        <!-- 1. 最终结果显示 -->
+        <div class="final-result">
+            <span id="final-result">0</span>
         </div>
 
-        <div id="homeTab" class="active">
-            <div id="resultDisplay">0.00</div>
-            <div id="literDisplay">0.00 升</div>
-            <div class="button-group">
-                <input type="number" id="inputA" placeholder="输入金额" step="0.01" onfocus="clearInput(this)" oninput="updateCalculation()">
-                <div class="price-options">
-                    <div id="highPriceOption" class="price-option" onclick="selectPrice('high')">高价卡：0.00</div>
-                    <div id="lowPriceOption" class="price-option" onclick="selectPrice('low')">低价卡：0.00</div>
-                </div>
-                <div class="price-display">
-                    <span>优惠价：<span id="showC">0.00</span></span>
-                    <button id="toggleD" class="compact-btn" onclick="toggleD()">员工(关闭)</button>
-                </div>
-            </div>
-            <div class="image-buttons">
-                <button onclick="showImage(0)">微信支付</button>
-                <button id="creditCardButton" onclick="showImage(1)">信用卡支付</button>
-                <button onclick="showImage(2)">加入群聊</button>
-            </div>
+        <!-- 2. 优惠价和升数显示 -->
+        <div class="info-row">
+            <div class="info-item left">优惠价: <span id="discount-price">0</span>元</div>
+            <div class="info-item right">升数: <span id="fuel-liter">0</span>升</div>
         </div>
 
-        <div id="settingsTab">
-            <div class="setting-item">
-                <h4>原价设置</h4>
-                <div class="price-setting">
-                    <label>高价卡：</label>
-                    <input type="number" id="highPriceInput" step="0.01" onchange="updatePrice('high')">
-                </div>
-                <div class="price-setting">
-                    <label>低价卡：</label>
-                    <input type="number" id="lowPriceInput" step="0.01" onchange="updatePrice('low')">
-                </div>
-            </div>
+        <!-- 3. 金额输入 -->
+        <div class="input-group">
+            <input type="text" id="amount-input" placeholder="输入金额 (如: 100+200)" inputmode="decimal">
+        </div>
 
-            <div class="setting-item">
-                <label>优惠价：</label>
-                <input type="number" id="inputC" step="0.01">
-            </div>
+        <!-- 4. 高价卡和低价卡按钮 -->
+        <div class="card-buttons">
+            <button id="high-card" class="card-button active">高价卡 <span id="high-card-value">7.50</span>元</button>
+            <button id="low-card" class="card-button">低价卡 <span id="low-card-value">7.00</span>元</button>
+        </div>
 
-            <div class="setting-item">
-                <label>员工提成：</label>
-                <input type="number" id="inputD" step="0.01">
+        <!-- 5. 尿素数量和加油员 -->
+        <div class="urea-row">
+            <div class="urea-controls">
+                <button class="urea-btn" id="urea-minus">-</button>
+                <input type="number" id="urea-input" value="0" min="0" placeholder="尿素" inputmode="numeric">
+                <button class="urea-btn" id="urea-plus">+</button>
             </div>
+            <button id="attendant-btn" class="attendant-button">加油员</button>
+        </div>
 
-            <div class="setting-item">
-                <h4>图片设置</h4>
-                <label>微信支付二维码：</label>
-                <input type="file" id="imageUpload1" accept="image/*" onchange="handleImageUpload(0)">
-                <label>信用卡支付二维码：</label>
-                <input type="file" id="imageUpload2" accept="image/*" onchange="handleImageUpload(1)">
-                <label>加入群聊二维码：</label>
-                <input type="file" id="imageUpload3" accept="image/*" onchange="handleImageUpload(2)">
+        <!-- 6. 确认按钮 -->
+        <button id="confirm-btn" class="primary-button">确认保存</button>
+
+        <!-- 7. 图片按钮 -->
+        <div class="image-buttons">
+            <button id="wechat-pay" class="image-button">微信付款</button>
+            <button id="credit-card" class="image-button">信用卡付款</button>
+            <button id="group-chat" class="image-button">加入群聊</button>
+        </div>
+
+        <!-- 8. 设置和记录查询按钮 -->
+        <div class="action-buttons">
+            <button id="settings-btn" class="secondary-button">设置</button>
+            <button id="records-btn" class="secondary-button">记录查询</button>
+        </div>
+
+        <!-- 记录查询模态框 -->
+        <div id="records-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn">&times;</span>
+                <h2>记录查询</h2>
+                <ul id="records-list"></ul>
             </div>
-
-            <button onclick="saveSettings()">保存设置</button>
         </div>
     </div>
 
-    <!-- 图片弹窗 -->
-    <div id="imageModal">
-        <span class="close" onclick="closeImageModal()">&times;</span>
-        <img id="modalImage" src="" alt="图片" onclick="closeImageModal()">
-    </div>
-
-    <script>
-        let dActive = false;
-        let settings = {
-            highPrice: 0,
-            lowPrice: 0,
-            C: 0, // 优惠价
-            D: 0  // 员工提成
-        };
-        let images = [null, null, null]; // 存储 3 张图片的 Base64 数据
-
-        // 初始化
-        function init() {
-            loadFromStorage();
-            showTab('home'); // 默认显示主界面
-            updatePriceDisplay();
-            updateDisplay();
-            initEventListeners();
-
-            // 初始化原价选择
-            const savedPriceType = localStorage.getItem('selectedPriceType');
-            if (savedPriceType) {
-                selectPrice(savedPriceType, false);
-            } else {
-                selectPrice('high', false); // 默认选择高价卡
-            }
-        }
-
-        // 显示选项卡
-        function showTab(tabName) {
-            // 移除所有选项卡的 active 类
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            
-            // 隐藏所有内容区域
-            document.getElementById('homeTab').style.display = 'none';
-            document.getElementById('settingsTab').style.display = 'none';
-            
-            // 显示选中的选项卡内容
-            if (tabName === 'home') {
-                document.querySelector('.tab:nth-child(1)').classList.add('active');
-                document.getElementById('homeTab').style.display = 'block';
-            } else if (tabName === 'settings') {
-                document.querySelector('.tab:nth-child(2)').classList.add('active');
-                document.getElementById('settingsTab').style.display = 'block';
-            }
-        }
-
-        // 选择原价
-        function selectPrice(priceType, updateStorage = true) {
-            const highPriceOption = document.getElementById('highPriceOption');
-            const lowPriceOption = document.getElementById('lowPriceOption');
-            highPriceOption.classList.remove('selected');
-            lowPriceOption.classList.remove('selected');
-            if (priceType === 'high') {
-                highPriceOption.classList.add('selected');
-            } else {
-                lowPriceOption.classList.add('selected');
-            }
-            if (updateStorage) {
-                localStorage.setItem('selectedPriceType', priceType);
-            }
-            updateCalculation(); // 触发计算逻辑
-        }
-
-        // 更新原价显示
-        function updatePriceDisplay() {
-            const highPrice = settings.highPrice || 0;
-            const lowPrice = settings.lowPrice || 0;
-            document.getElementById('highPriceOption').textContent = `高价卡：${highPrice.toFixed(2)}`;
-            document.getElementById('lowPriceOption').textContent = `低价卡：${lowPrice.toFixed(2)}`;
-        }
-
-        // 更新原价设置
-        function updatePrice(priceType) {
-            const input = priceType === 'high' ? document.getElementById('highPriceInput') : document.getElementById('lowPriceInput');
-            const value = parseFloat(input.value) || 0;
-            if (priceType === 'high') {
-                settings.highPrice = value;
-            } else {
-                settings.lowPrice = value;
-            }
-
-            // 保存到本地存储
-            saveToStorage();
-
-            // 更新主界面显示
-            updatePriceDisplay();
-            updateCalculation();
-        }
-
-        // 保存设置
-        function saveSettings() {
-            // 保存设置
-            settings.highPrice = parseFloat(document.getElementById('highPriceInput').value) || 0;
-            settings.lowPrice = parseFloat(document.getElementById('lowPriceInput').value) || 0;
-            settings.C = parseFloat(document.getElementById('inputC').value) || 0;
-            settings.D = parseFloat(document.getElementById('inputD').value) || 0;
-
-            // 保存到本地存储
-            saveToStorage();
-
-            // 更新主界面显示
-            updatePriceDisplay();
-            updateDisplay();
-            updateCalculation();
-
-            // 返回主界面
-            showTab('home');
-        }
-
-        // 更新显示
-        function updateDisplay() {
-            const C = settings.C || 0; // 优惠价
-            const D = dActive ? (settings.D || 0) : 0; // 员工提成
-            const total = C + D; // 优惠价加员工提成的总和
-
-            // 更新优惠价显示
-            document.getElementById('showC').textContent = total.toFixed(2);
-        }
-
-        // 计算
-        function updateCalculation() {
-            const selectedPriceType = localStorage.getItem('selectedPriceType');
-            if (!selectedPriceType) {
-                document.getElementById('resultDisplay').textContent = '0.00';
-                document.getElementById('literDisplay').textContent = '0.00 升';
-                return;
-            }
-
-            const A = parseFloat(document.getElementById('inputA').value) || 0; // 输入金额
-            const B = getCurrentPrice(); // 当前原价
-            const C = settings.C || 0; // 优惠价
-            const D = dActive ? (settings.D || 0) : 0; // 员工提成
-
-            const E = (A / B) * (C + D); // 最终价格
-            document.getElementById('resultDisplay').textContent = E.toFixed(2);
-
-            const liters = (A / B).toFixed(2); // 升数
-            document.getElementById('literDisplay').textContent = `${liters} 升`;
-        }
-
-        // 获取当前原价
-        function getCurrentPrice() {
-            const selectedPriceType = localStorage.getItem('selectedPriceType') || 'high';
-            return selectedPriceType === 'high' ? settings.highPrice : settings.lowPrice;
-        }
-
-        // 保存到本地存储
-        function saveToStorage() {
-            localStorage.setItem('settings', JSON.stringify(settings));
-            localStorage.setItem('images', JSON.stringify(images));
-        }
-
-        // 从本地存储加载
-        function loadFromStorage() {
-            const savedSettings = localStorage.getItem('settings');
-            const savedImages = localStorage.getItem('images');
-            if (savedSettings) settings = JSON.parse(savedSettings);
-            if (savedImages) images = JSON.parse(savedImages);
-        }
-
-        // 图片相关功能
-        function handleImageUpload(index) {
-            const fileInput = document.getElementById(`imageUpload${index + 1}`);
-            const file = fileInput.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    images[index] = e.target.result;
-                    saveToStorage();
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function showImage(index) {
-            if (images[index]) {
-                document.getElementById('modalImage').src = images[index];
-                document.getElementById('imageModal').style.display = 'flex';
-            } else {
-                alert('请先在设置页上传图片');
-            }
-        }
-
-        function closeImageModal() {
-            document.getElementById('imageModal').style.display = 'none';
-        }
-
-        // 清空输入框
-        function clearInput(input) {
-            input.value = '';
-        }
-
-        // 切换员工提成状态
-        function toggleD() {
-            dActive = !dActive; // 切换员工提成状态
-            const btn = document.getElementById('toggleD');
-            btn.textContent = `员工(${dActive ? '开启' : '关闭'})`; // 更新按钮文本
-
-            // 更新优惠价显示
-            updateDisplay();
-            // 更新计算结果
-            updateCalculation();
-        }
-
-        // 初始化
-        init();
-        setInterval(saveToStorage, 5000);
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>

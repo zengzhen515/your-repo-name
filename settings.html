@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="HandheldFriendly" content="true">
+    <title>设置</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .container {
+            max-width: 500px;
+            margin: 20px auto;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .button-group button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center; margin-bottom: 20px;">设置</h1>
+        
+        <div class="input-group">
+            <label for="high-card-input">高价卡值 (元):</label>
+            <input type="number" id="high-card-input" step="0.01" inputmode="decimal">
+        </div>
+        
+        <div class="input-group">
+            <label for="low-card-input">低价卡值 (元):</label>
+            <input type="number" id="low-card-input" step="0.01" inputmode="decimal">
+        </div>
+        
+        <div class="input-group">
+            <label for="discount-input">基础优惠价 (D元):</label>
+            <input type="number" id="discount-input" step="0.01" inputmode="decimal">
+        </div>
+        
+        <div class="input-group">
+            <label for="attendant-input">加油员附加值 (元):</label>
+            <input type="number" id="attendant-input" step="0.01" inputmode="decimal">
+        </div>
+        
+        <div class="input-group">
+            <label for="urea-input">尿素单价 (元):</label>
+            <input type="number" id="urea-input" step="0.01" inputmode="decimal">
+        </div>
+        
+        <div class="input-group">
+            <label for="wechat-image">微信付款二维码:</label>
+            <input type="file" id="wechat-image" accept="image/*">
+        </div>
+        
+        <div class="input-group">
+            <label for="credit-image">信用卡付款二维码:</label>
+            <input type="file" id="credit-image" accept="image/*">
+        </div>
+        
+        <div class="input-group">
+            <label for="group-image">加入群聊二维码:</label>
+            <input type="file" id="group-image" accept="image/*">
+        </div>
+        
+        <div class="button-group">
+            <button id="save-btn" class="primary-button">保存设置</button>
+            <button id="back-btn" class="secondary-button">返回</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载保存的设置
+            document.getElementById('high-card-input').value = localStorage.getItem('highCardValue') || '7.50';
+            document.getElementById('low-card-input').value = localStorage.getItem('lowCardValue') || '7.00';
+            document.getElementById('discount-input').value = localStorage.getItem('discountPrice') || '0.50';
+            document.getElementById('attendant-input').value = localStorage.getItem('attendantValue') || '0.20';
+            document.getElementById('urea-input').value = localStorage.getItem('ureaPrice') || '10.00';
+
+            // 保存设置
+            document.getElementById('save-btn').addEventListener('click', function() {
+                const highValue = document.getElementById('high-card-input').value;
+                const lowValue = document.getElementById('low-card-input').value;
+                const discount = document.getElementById('discount-input').value;
+                const attendant = document.getElementById('attendant-input').value;
+                const urea = document.getElementById('urea-input').value;
+
+                if (!highValue || !lowValue || !discount || !attendant || !urea) {
+                    alert('请填写所有设置项！');
+                    return;
+                }
+
+                localStorage.setItem('highCardValue', highValue);
+                localStorage.setItem('lowCardValue', lowValue);
+                localStorage.setItem('discountPrice', discount);
+                localStorage.setItem('attendantValue', attendant);
+                localStorage.setItem('ureaPrice', urea);
+
+                // 保存图片
+                saveImage('wechat-image', 'wechatPayImage');
+                saveImage('credit-image', 'creditCardImage');
+                saveImage('group-image', 'groupChatImage');
+
+                alert('设置已保存！');
+                window.location.href = 'index.html';
+            });
+
+            // 返回按钮
+            document.getElementById('back-btn').addEventListener('click', function() {
+                window.location.href = 'index.html';
+            });
+
+            // 保存图片函数
+            function saveImage(inputId, storageKey) {
+                const file = document.getElementById(inputId).files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        localStorage.setItem(storageKey, e.target.result);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

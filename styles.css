@@ -1,0 +1,310 @@
+/* 基础重置 */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* 全局样式 */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    padding: 10px;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 100%;
+    width: 100%;
+    background-color: white;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin: 0 auto;
+}
+
+/* 最终结果 */
+.final-result {
+    text-align: center;
+    margin: 15px 0;
+}
+
+#final-result {
+    font-size: 2.8rem;
+    font-weight: bold;
+    color: #e74c3c;
+}
+
+/* 信息行 */
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    font-size: 0.95rem;
+}
+
+.info-item {
+    padding: 8px 0;
+}
+
+/* 输入组 */
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    text-align: center;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+/* 按钮样式 */
+button {
+    border: none;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+button:active {
+    transform: scale(0.96);
+    opacity: 0.9;
+}
+
+.card-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.card-button {
+    flex: 1;
+    padding: 12px;
+    border-radius: 6px;
+    background-color: #f8f9fa;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+}
+
+.card-button.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+/* 尿素行 */
+.urea-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.urea-controls {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.urea-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    background-color: #f8f9fa;
+    font-size: 1.2rem;
+    border: 1px solid #ddd;
+}
+
+#urea-input {
+    width: 60px;
+    margin: 0 5px;
+    padding: 8px;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+.attendant-button {
+    padding: 10px 15px;
+    border-radius: 6px;
+    background-color: #ddd;
+    font-size: 1rem;
+    margin-left: 10px;
+}
+
+.attendant-button.active {
+    background-color: #007bff;
+    color: white;
+}
+
+/* 主要按钮 */
+.primary-button {
+    width: 100%;
+    padding: 15px;
+    background-color: #28a745;
+    color: white;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+}
+
+/* 图片按钮 */
+.image-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.image-button {
+    flex: 1;
+    padding: 12px;
+    background-color: #17a2b8;
+    color: white;
+    border-radius: 6px;
+    font-size: 0.95rem;
+}
+
+/* 操作按钮 */
+.action-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.secondary-button {
+    flex: 1;
+    padding: 12px;
+    background-color: #6c757d;
+    color: white;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+/* 模态框 */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 15px;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    -webkit-overflow-scrolling: touch;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #777;
+}
+
+#records-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 15px;
+}
+
+#records-list li {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    position: relative;
+}
+
+.record-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.record-date {
+    font-weight: bold;
+}
+
+.delete-btn {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 0.8rem;
+}
+
+.record-detail {
+    display: flex;
+    justify-content: space-between;
+    margin: 5px 0;
+    font-size: 0.9rem;
+}
+
+.record-total {
+    margin-top: 8px;
+    font-weight: bold;
+    text-align: right;
+    color: #e74c3c;
+}
+
+/* 移动端优化 */
+@media (max-width: 480px) {
+    #final-result {
+        font-size: 2.2rem;
+    }
+    
+    .card-button, .image-button, .secondary-button {
+        padding: 10px 8px;
+        font-size: 0.9rem;
+    }
+    
+    .primary-button {
+        padding: 14px;
+    }
+    
+    .input-group input {
+        padding: 12px;
+    }
+    
+    .urea-btn {
+        width: 35px;
+        height: 35px;
+    }
+    
+    #urea-input {
+        width: 50px;
+    }
+    
+    .modal-content {
+        padding: 15px;
+    }
+}
+
+/* 防止iOS缩放 */
+input, select, textarea {
+    font-size: 16px !important;
+}
